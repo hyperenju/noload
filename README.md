@@ -4,7 +4,7 @@
 # Get Started
 ```bash
 make # build
-sudo insmod noload.ko nthreads=10000 # install
+sudo insmod noload.ko load=10000 # install
 sudo rmmod noload # uninstall
 ```
 

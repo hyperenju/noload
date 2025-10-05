@@ -7,9 +7,9 @@
 
 #define DEFAULT_TIMEOUT_SECS 60
 
-static unsigned int nthreads = 10000;
-module_param(nthreads, uint, 0444);
-MODULE_PARM_DESC(nthreads, "Number of threads to create (default: 10000)");
+static unsigned int load = 10000;
+module_param(load, uint, 0444);
+MODULE_PARM_DESC(load, "Target load (default: 10000)");
 
 struct task_struct **kthreads;
 
@@ -35,16 +35,16 @@ static int kthread_fn(void *unused) {
 static int __init noload_init(void) {
     int i, ret;
 
-    if (nthreads == 0) {
-        pr_err("nthreads(%d) must be greater than 0.\n", nthreads);
+    if (load == 0) {
+        pr_err("load(%d) must be greater than 0.\n", load);
         return -EINVAL;
     }
 
-    kthreads = vmalloc_array(nthreads, sizeof(struct task_struct *));
+    kthreads = vmalloc_array(load, sizeof(struct task_struct *));
     if (!kthreads)
         return -ENOMEM;
 
-    for (i = 0; i < nthreads; i++) {
+    for (i = 0; i < load; i++) {
         struct task_struct *k = kthread_run(kthread_fn, NULL, "noload/%07d", i);
         if (IS_ERR(k)) {
             ret = PTR_ERR(k);
@@ -65,7 +65,7 @@ err:
 }
 
 static void __exit noload_exit(void) {
-    for (int i = 0; i < nthreads; i++)
+    for (int i = 0; i < load; i++)
         if (kthreads[i] != NULL)
             kthread_stop(kthreads[i]);
 
