@@ -36,7 +36,7 @@ static int __init noload_init(void) {
     int i, ret;
 
     if (nthreads == 0) {
-        pr_err("nthreads must be greater than 0.\n");
+        pr_err("nthreads(%d) must be greater than 0.\n", nthreads);
         return -EINVAL;
     }
 
