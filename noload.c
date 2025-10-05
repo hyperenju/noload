@@ -16,20 +16,19 @@ struct task_struct **kthreads;
 static unsigned long timeout_secs(void) {
 #if IS_ENABLED(CONFIG_DETECT_HUNG_TASK)
     extern unsigned long sysctl_hung_task_timeout_secs __attribute__((weak));
-    if (&sysctl_hung_task_timeout_secs) {
+    if (&sysctl_hung_task_timeout_secs)
         return sysctl_hung_task_timeout_secs
                    ? sysctl_hung_task_timeout_secs / 2 + 1
                    : CONFIG_DEFAULT_HUNG_TASK_TIMEOUT;
-    }
 #endif
 
     return DEFAULT_TIMEOUT_SECS;
 }
 
 static int kthread_fn(void *unused) {
-    while (!kthread_should_stop()) {
+    while (!kthread_should_stop())
         schedule_timeout_uninterruptible(timeout_secs() * HZ);
-    }
+
     return 0;
 }
 
@@ -42,10 +41,8 @@ static int __init noload_init(void) {
     }
 
     kthreads = vmalloc_array(nthreads, sizeof(struct task_struct *));
-    if (!kthreads) {
-        pr_err("Failed to allocate memory for %u thread pointer\n", nthreads);
+    if (!kthreads)
         return -ENOMEM;
-    }
 
     for (i = 0; i < nthreads; i++) {
         struct task_struct *k = kthread_run(kthread_fn, NULL, "noload/%07d", i);
@@ -59,10 +56,10 @@ static int __init noload_init(void) {
     return 0;
 
 err:
-    for (int j = 0; j < i; j++) {
+    for (int j = 0; j < i; j++)
         if (kthreads[j] != NULL)
             kthread_stop(kthreads[j]);
-    }
+
     vfree(kthreads);
     return ret;
 }
@@ -71,6 +68,7 @@ static void __exit noload_exit(void) {
     for (int i = 0; i < nthreads; i++)
         if (kthreads[i] != NULL)
             kthread_stop(kthreads[i]);
+
     vfree(kthreads);
     return;
 }
